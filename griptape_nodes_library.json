@@ -1,0 +1,62 @@
+{
+  "name": "Griptape Nodes Library - Development",
+  "library_schema_version": "0.1.0",
+  "metadata": {
+    "author": "Griptape, Inc",
+    "description": "Development nodes for Griptape Nodes",
+    "library_version": "0.34.0",
+    "engine_version": "0.34.0",
+    "tags": [
+      "Griptape",
+      "AI",
+      "Development"
+    ]
+  },
+  "categories": [
+    {
+      "YAML": {
+        "title": "YAML",
+        "description": "YAML related nodes",
+        "color": "border-gray-500",
+        "icon": "Database"
+      }
+    },
+    {
+      "audio": {
+        "color": "border-sky-500",
+        "title": "Audio",
+        "description": "Audio related nodes",
+        "icon": "SpeakerWave"
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "class_name": "YAMLLoaderNode",
+      "file_path": "nodes/yaml_loader_node.py",
+      "metadata": {
+        "category": "YAML",
+        "description": "Loads a YAML file and creates output parameters for each key-value pair. Top-level keys are displayed as section headers, and nested values are available as output parameters.",
+        "display_name": "YAML Loader"
+      }
+    },
+    {
+      "class_name": "TextToSpeechNode",
+      "file_path": "nodes/text_to_speech_node.py",
+      "metadata": {
+        "category": "audio",
+        "description": "Converts text to speech using OpenAI's text-to-speech API",
+        "display_name": "Text to Speech"
+      }
+    },
+    {
+      "class_name": "SaveAudio",
+      "file_path": "nodes/save_audio_node.py",
+      "metadata": {
+        "category": "audio",
+        "description": "Saves an audio file to disk with a specified filename",
+        "display_name": "Save Audio"
+      }
+    }
+  ]
+} 
