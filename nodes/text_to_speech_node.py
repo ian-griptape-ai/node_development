@@ -1,10 +1,11 @@
 from typing import Any
 import openai
-from griptape_nodes.exe_types.node_types import DataNode
+from griptape_nodes.exe_types.node_types import DataNode, NodeResolutionState
 from griptape_nodes.exe_types.core_types import Parameter, ParameterMode, ParameterTypeBuiltin
 from griptape.drivers.text_to_speech.openai import OpenAiTextToSpeechDriver
 from griptape.artifacts import AudioArtifact
 from griptape_nodes.traits.options import Options
+from griptape_nodes.exe_types.node_types import BaseNode
 
 class TextToSpeechNode(DataNode):
     def __init__(self, name: str, metadata: dict[Any, Any] | None = None) -> None:
@@ -134,6 +135,47 @@ class TextToSpeechNode(DataNode):
         except Exception as e:
             self.parameter_values["status_message"] = f"Error generating audio: {str(e)}"
             raise
+
+    def mark_for_processing(self) -> None:
+        """Mark this node as needing to be processed."""
+        # Reset the node's state to UNRESOLVED
+        self.state = NodeResolutionState.UNRESOLVED
+        
+        # Clear any existing output values
+        for param in self.parameters:
+            if ParameterMode.OUTPUT in param.allowed_modes:
+                self.parameter_output_values[param.name] = None
+
+    def after_value_set(self, parameter: Parameter, value: Any, modified_parameters_set: set[str]) -> None:
+        # If this parameter change requires reprocessing
+        if parameter.name in ["text", "voice", "format"]:  # Replace with your relevant parameter names
+            self.mark_for_processing()
+
+    def after_incoming_connection(
+        self,
+        source_node: BaseNode,  # noqa: ARG002
+        source_parameter: Parameter,  # noqa: ARG002
+        target_parameter: Parameter,
+        modified_parameters_set: set[str],  # noqa: ARG002
+    ) -> None:
+        """Callback after a Connection has been established TO this Node."""
+        # Mark for processing when we get a new input connection
+        if target_parameter.name in ["text", "voice", "format"]:
+            self.mark_for_processing()
+
+    def after_incoming_connection_removed(
+        self,
+        source_node: BaseNode,  # noqa: ARG002
+        source_parameter: Parameter,  # noqa: ARG002
+        target_parameter: Parameter,
+        modified_parameters_set: set[str],  # noqa: ARG002
+    ) -> None:
+        """Callback after a Connection TO this Node was REMOVED."""
+        # Mark for processing when an input connection is removed
+        if target_parameter.name in ["text", "voice", "format"]:
+            self.mark_for_processing()
+            # Clear the parameter value since the connection was removed
+            self.remove_parameter_value(target_parameter.name)
 
     def validate_before_workflow_run(self) -> list[Exception] | None:
         """Validate the node configuration before running."""
