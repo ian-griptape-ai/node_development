@@ -28,6 +28,14 @@
         "description": "Audio related nodes",
         "icon": "SpeakerWave"
       }
+    },
+    {
+      "development": {
+        "color": "border-sky-500",
+        "title": "Developement",
+        "description": "Audio related nodes",
+        "icon": "Database"
+      }
     }
   ],
   "nodes": [
@@ -56,6 +64,15 @@
         "category": "audio",
         "description": "Saves an audio file to disk with a specified filename",
         "display_name": "Save Audio"
+      }
+    },
+    {
+      "class_name": "ExampleNode",
+      "file_path": "nodes/example_node.py",
+      "metadata": {
+        "category": "development",
+        "description": "An example node with a free text entry, a dropdown, and an integer slider.",
+        "display_name": "Example Node"
       }
     }
   ]
