@@ -3,10 +3,14 @@ from griptape_nodes.exe_types.node_types import DataNode
 from griptape_nodes.exe_types.core_types import Parameter, ParameterMode, ParameterTypeBuiltin
 from griptape_nodes.traits.options import Options
 from griptape_nodes.traits.slider import Slider
+from griptape_nodes.exe_types.node_types import BaseNode
 
 class ExampleNode(DataNode):
     def __init__(self, name: str, metadata: dict[Any, Any] | None = None) -> None:
         super().__init__(name, metadata)
+
+        # State to track incoming connections
+        self.incoming_connections = {}
 
         # Free text entry parameter
         self.add_parameter(
@@ -21,6 +25,9 @@ class ExampleNode(DataNode):
                 }
             )
         )
+
+        # Initialize state for each parameter
+        self.incoming_connections["free_text"] = False
 
         # Dropdown parameter
         self.add_parameter(
@@ -99,4 +106,26 @@ class ExampleNode(DataNode):
         self.parameter_output_values["random_float"] = random_float
 
         # For demonstration, just print the values
-        print(f"Free Text: {free_text}, Dropdown: {dropdown}, Integer Slider: {integer_slider}, Reversed Text: {self.parameter_output_values['reversed_text']}, Random Float: {random_float}") 
+        print(f"Free Text: {free_text}, Dropdown: {dropdown}, Integer Slider: {integer_slider}, Reversed Text: {self.parameter_output_values['reversed_text']}, Random Float: {random_float}")
+
+    def after_incoming_connection(self, source_node: BaseNode, source_parameter: Parameter, target_parameter: Parameter, modified_parameters_set: set[str]) -> None:
+        # Mark the parameter as having an incoming connection
+        self.incoming_connections[target_parameter.name] = True
+
+    def after_incoming_connection_removed(self, source_node: BaseNode, source_parameter: Parameter, target_parameter: Parameter, modified_parameters_set: set[str]) -> None:
+        # Mark the parameter as not having an incoming connection
+        self.incoming_connections[target_parameter.name] = False
+
+    def validate_before_workflow_run(self) -> list[Exception] | None:
+        errors = []
+        free_text_value = self.get_parameter_value("free_text")
+
+        # Check if 'free_text' is empty
+        if not free_text_value:
+            errors.append(ValueError("The 'free_text' parameter is empty."))
+
+        # Check if 'free_text' has an incoming connection
+        if not self.incoming_connections.get("free_text", False):
+            errors.append(ValueError("The 'free_text' parameter does not have an incoming connection."))
+
+        return errors if errors else None 
